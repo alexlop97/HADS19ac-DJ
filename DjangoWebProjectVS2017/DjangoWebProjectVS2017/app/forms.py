@@ -11,7 +11,7 @@ class QuestionForm(forms.ModelForm):
 
         class Meta:
             model = Question
-            fields = ('question_text',)
+            fields = ('question_text', 'category', 'correct_choice')
 
 class ChoiceForm(forms.ModelForm):
 

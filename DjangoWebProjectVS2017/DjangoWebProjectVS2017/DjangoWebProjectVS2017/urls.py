@@ -52,6 +52,8 @@ urlpatterns = [
     url(r'^(?P<question_id>\d+)/results/$', app.views.results, name='results'),
     url(r'^polls/(?P<question_id>\d+)/$', app.views.detail, name='detail'),
     url(r'^polls/(?P<question_id>\d+)/vote/$', app.views.vote, name='vote'),
+    url(r'^polls/(?P<category>\w+)/', app.views.index_category, name='index_category'),
     url(r'^polls/', app.views.index, name='index'),
+    
    
 ]

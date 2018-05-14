@@ -53,12 +53,77 @@ def about(request):
             'year':datetime.now().year,
         }
     )
-def index(request):
+def index_category(request, category):
+    correct_question_list = []
+
+    questions_of_category = Question.objects.filter(category=category)
+    if not request.user.is_authenticated:
+        for c_question in questions_of_category:
+            choice_list = Choice.objects.filter(question = c_question)
+            choice_count = 0
+            for c_choice in choice_list:
+                choice_count += 1
+            if choice_count >= 2 and choice_count <= 4:
+                correct_question_list.append(c_question)
+    
+    else:
+        correct_question_list = questions_of_category
+
     latest_question_list = Question.objects.order_by('-pub_date')
+    correct_question_category_list = []
+
+    if not request.user.is_authenticated:
+        for c_question in latest_question_list:
+            choice_list = Choice.objects.filter(question = c_question)
+            choice_count = 0
+            for c_choice in choice_list:
+                choice_count += 1
+            if choice_count >= 2 and choice_count <= 4:
+                correct_question_category_list.append(c_question)
+    
+    else:
+        correct_question_category_list = latest_question_list
+
+    category_list = []
+    for c_q in correct_question_category_list:
+        if c_q.category not in category_list:
+            category_list.append(c_q.category)
+
     template = loader.get_template('polls/index.html')
     context = {
                 'title':'Lista de preguntas de la encuesta',
-                'latest_question_list': latest_question_list,
+                'latest_question_list': correct_question_list,
+                'category_list' : category_list
+              }
+    return render(request, 'polls/index.html', context)
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')
+    correct_question_list = []
+
+    if not request.user.is_authenticated:
+        for c_question in latest_question_list:
+            choice_list = Choice.objects.filter(question = c_question)
+            choice_count = 0
+            for c_choice in choice_list:
+                choice_count += 1
+            if choice_count >= 2 and choice_count <= 4:
+                correct_question_list.append(c_question)
+    
+    else:
+        correct_question_list = latest_question_list
+
+
+    category_list = []
+    for c_q in correct_question_list:
+        if c_q.category not in category_list:
+            category_list.append(c_q.category)
+
+    template = loader.get_template('polls/index.html')
+    context = {
+                'title':'Lista de preguntas de la encuesta',
+                'latest_question_list': correct_question_list,
+                'category_list' : category_list
               }
     return render(request, 'polls/index.html', context)
 
@@ -103,18 +168,34 @@ def question_new(request):
 
 def choice_add(request, question_id):
         question = Question.objects.get(id = question_id)
-        if request.method =='POST':
-            form = ChoiceForm(request.POST)
-            if form.is_valid():
-                choice = form.save(commit = False)
-                choice.question = question
-                choice.vote = 0
-                choice.save()         
-                #form.save()
-        else: 
+
+        choice_list = Choice.objects.filter(question = question)
+        choice_count = 0
+        for c_choice in choice_list:
+                choice_count += 1
+        if choice_count < 4:
+            if request.method =='POST':
+                form = ChoiceForm(request.POST)
+                if form.is_valid():
+                    choice = form.save(commit = False)
+                    choice.question = question
+                    choice.vote = 0
+                    choice.save()         
+                    #form.save()
+            else: 
+                form = ChoiceForm()
+            #return render_to_response ('choice_new.html', {'form': form, 'poll_id': poll_id,}, context_instance = RequestContext(request),)
+            return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form})
+
+        else:
             form = ChoiceForm()
-        #return render_to_response ('choice_new.html', {'form': form, 'poll_id': poll_id,}, context_instance = RequestContext(request),)
-        return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form})
+            form.fields['choice_text'].widget.attrs['readonly'] = True
+
+            return render(request, 'polls/choice_new.html', {
+            'title':'Pregunta:'+ question.question_text,
+            'form' : form,
+            'message': "ERROR: Número máximo de opciones alcanzado.",
+        })
 
 def chart(request, question_id):
     q=Question.objects.get(id = question_id)
