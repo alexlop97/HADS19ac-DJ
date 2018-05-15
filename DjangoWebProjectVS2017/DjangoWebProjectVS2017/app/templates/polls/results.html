@@ -3,6 +3,7 @@
 
 <h2>{{ title }}.</h2>
 <h3>{{ message }}</h3>
+<h3>{{ resultado }}</h3>
 
 <h1>{{ question.question_text }}</h1>
 
@@ -13,6 +14,7 @@
 </ul>
 
 <a href="{% url 'chart' question.id %}"> Ver grafica</a><br />
-<a href="{% url 'index' %}">Contestar otra pregunta?</a>
+<a href="{% url 'index' %}">Contestar otra pregunta?</a><br />
+<a href="{% url 'detail' question.id %}">Volver a contestar la misma pregunta</a>
 
 {% endblock %}

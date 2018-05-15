@@ -131,9 +131,22 @@ def detail(request, question_id):
      question = get_object_or_404(Question, pk=question_id)
      return render(request, 'polls/detail.html', {'title':'Respuestas asociadas a la pregunta:','question': question})
 
-def results(request, question_id):
+def results(request, question_id, choice_id):
     question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/results.html', {'title':'Resultados de la pregunta:','question': question})
+
+    choices = question.choice_set.order_by('id')
+    counter = 1
+    for choice in choices:
+        if choice.id == int(choice_id):
+            selected_pos = counter
+        counter += 1
+
+    if selected_pos == question.correct_choice:
+        mes = 'Correcta!'
+    else:
+        mes = 'Incorrecta!'
+
+    return render(request, 'polls/results.html', {'title':'Resultados de la pregunta:','question': question, 'resultado' : mes})
 
 def vote(request, question_id):
     p = get_object_or_404(Question, pk=question_id)
@@ -151,7 +164,7 @@ def vote(request, question_id):
         # Siempre devolver un HttpResponseRedirect despues de procesar
         # exitosamente el POST de un form. Esto evita que los datos se
         # puedan postear dos veces si el usuario vuelve atras en su browser.
-        return HttpResponseRedirect(reverse('results', args=(p.id,)))
+        return HttpResponseRedirect(reverse('results', args=(p.id, selected_choice.id)))
 
 def question_new(request):
         if request.method == "POST":
