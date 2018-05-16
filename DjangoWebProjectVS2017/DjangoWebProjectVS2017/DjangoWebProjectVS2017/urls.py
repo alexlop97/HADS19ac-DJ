@@ -54,5 +54,6 @@ urlpatterns = [
     url(r'^polls/(?P<question_id>\d+)/vote/', app.views.vote, name='vote'),
     url(r'^polls/(?P<category>\w+)/', app.views.index_category, name='index_category'),
     url(r'^polls/', app.views.index, name='index'),
+    url(r'^VoteAJAX/', app.views.voteAJAX, name='voteAJAX'),
     
 ]

@@ -1,12 +1,18 @@
 ﻿{% extends "app/layout.html" %}
 {% block content %}
 
+<img src="http://papayabooks.com/wp-content/uploads/2017/08/gears.gif" id="Cargando" style="display: none"/>
+
+<div id="results">
+
+
+
 <h2>{{ title }}.</h2>
 <h3>{{ message }}</h3>
 
 <h3>Pregunta: {{ question.question_text }}</h3>
 {% if error_message %}<p><strong style="color:red;"><b>{{ error_message }}</b></strong></p>{% endif %}
-<form action="{% url 'vote' question.id %}" method="post">
+<form id="form" action="{% url 'vote' question.id %}" method="post">
 {% csrf_token %}
 {% for choice in question.choice_set.all %}
     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
@@ -17,7 +23,32 @@
     <a href="{% url 'chart' question.id %}"> <h3>Ver resultado de la votacion</h3> </a><br />
 {% else %}
     <input type="submit" value="Vote" />
+    <input type="button" value="VoteAJAX" id="VoteAJAX"/>
 {% endif %}
 
 </form>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"> </script>
+
+<script>
+    $("#VoteAJAX").click(function(){
+
+        $("#Cargando").show();
+        $("#results").hide();
+        $.ajax({
+            url: '/VoteAJAX/',
+            data: $('#form').serialize() + '&question_id={{question.id}}',
+            success: function(data) {
+              $("#Cargando").hide();
+              $("#results").show();
+              $("#results").html(data);
+              $("#results hr").hide();
+              $("#results footer").hide();
+             }
+        });
+
+    });
+</script>
 {% endblock %}

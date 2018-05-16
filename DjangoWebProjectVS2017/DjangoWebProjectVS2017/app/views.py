@@ -166,6 +166,23 @@ def vote(request, question_id):
         # puedan postear dos veces si el usuario vuelve atras en su browser.
         return HttpResponseRedirect(reverse('results', args=(p.id, selected_choice.id)))
 
+def voteAJAX(request):
+    question_id = request.GET['question_id']
+    p = get_object_or_404(Question, pk=question_id)
+    try:
+        selected_choice = p.choice_set.get(pk=request.GET['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Vuelve a mostrar el form.
+           return render(request, 'polls/detail.html', {
+            'question': p,
+            'error_message': "ERROR: No se ha seleccionado una opcion",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+
+        return HttpResponseRedirect(reverse('results', args=(p.id, selected_choice.id)))
+
 def question_new(request):
         if request.method == "POST":
             form = QuestionForm(request.POST)
